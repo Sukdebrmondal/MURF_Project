@@ -1,4 +1,9 @@
 import logging
+import json
+import os
+from dataclasses import dataclass, field, asdict
+from datetime import datetime
+from typing import Optional
 
 from dotenv import load_dotenv
 from livekit.agents import (
@@ -12,8 +17,8 @@ from livekit.agents import (
     cli,
     metrics,
     tokenize,
-    # function_tool,
-    # RunContext
+    function_tool,
+    RunContext
 )
 from livekit.plugins import murf, silero, google, deepgram, noise_cancellation
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
@@ -23,31 +28,150 @@ logger = logging.getLogger("agent")
 load_dotenv(".env.local")
 
 
+@dataclass
+class OrderState:
+    """Tracks the current coffee order state"""
+    drinkType: Optional[str] = None
+    size: Optional[str] = None
+    milk: Optional[str] = None
+    extras: list[str] = field(default_factory=list)
+    name: Optional[str] = None
+    
+    def is_complete(self) -> bool:
+        """Check if all required fields are filled"""
+        return all([
+            self.drinkType is not None,
+            self.size is not None,
+            self.milk is not None,
+            self.name is not None
+        ])
+    
+    def to_dict(self) -> dict:
+        """Convert to dictionary for JSON serialization"""
+        return asdict(self)
+
+
 class Assistant(Agent):
     def __init__(self) -> None:
         super().__init__(
-            instructions="""You are a helpful voice AI assistant. The user is interacting with you via voice, even if you perceive the conversation as text.
-            You eagerly assist users with their questions by providing information from your extensive knowledge.
-            Your responses are concise, to the point, and without any complex formatting or punctuation including emojis, asterisks, or other symbols.
-            You are curious, friendly, and have a sense of humor.""",
-        )
+            instructions="""You are a warm, polite barista at Sukdeb Coffee Shop, a premium café known for its thoughtful and attentive service.
+            The customer is speaking with you by voice, so your responses should sound natural, relaxed, and easy to follow.
 
-    # To add tools, use the @function_tool decorator.
-    # Here's an example that adds a simple weather tool.
-    # You also have to add `from livekit.agents import function_tool, RunContext` to the top of this file
-    # @function_tool
-    # async def lookup_weather(self, context: RunContext, location: str):
-    #     """Use this tool to look up current weather information in the given location.
-    #
-    #     If the location is not supported by the weather service, the tool will indicate this. You must tell the user the location's weather is unavailable.
-    #
-    #     Args:
-    #         location: The location to look up weather information for (e.g. city name)
-    #     """
-    #
-    #     logger.info(f"Looking up weather for {location}")
-    #
-    #     return "sunny with a temperature of 70 degrees."
+            Your task is to help the customer place their coffee order by gathering a few key details:
+
+            1. The type of drink they'd like (for example: latte, cappuccino, espresso, americano, mocha, cold brew, etc.)
+
+            2. The size (small, medium, or large)
+
+            3. Their preferred milk option (whole, 2%, oat, almond, soy, or no milk)
+
+            4. Any additional extras they might want (such as whipped cream, an extra shot, vanilla syrup, caramel syrup, etc.) — optional
+
+            5. The customer's name for the order
+
+            Ask for this information one step at a time in a kind and patient manner.
+            If the customer isn't sure what they want, feel free to offer a few helpful suggestions.
+
+            After collecting all the details, read the full order back to the customer to make sure everything is correct before completing it.
+
+            Keep your tone courteous, warm, and welcoming, and avoid complex formatting or special characters."""
+        )
+        self.order = OrderState()
+
+    @function_tool
+    async def save_order(self, context: RunContext):
+        """Save the completed coffee order to a JSON file.
+        
+        Use this tool ONLY when you have confirmed all the order details with the customer
+        and they have approved the final order.
+        """
+        
+        if not self.order.is_complete():
+            missing = []
+            if not self.order.drinkType:
+                missing.append("drink type")
+            if not self.order.size:
+                missing.append("size")
+            if not self.order.milk:
+                missing.append("milk preference")
+            if not self.order.name:
+                missing.append("customer name")
+            
+            return f"Cannot save order. Missing: {', '.join(missing)}"
+        
+        # Create orders directory if it doesn't exist
+        orders_dir = "orders"
+        os.makedirs(orders_dir, exist_ok=True)
+        
+        # Generate filename with timestamp
+        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        filename = f"{orders_dir}/order_{timestamp}_{self.order.name.replace(' ', '_')}.json"
+        
+        # Save order to JSON file
+        order_data = self.order.to_dict()
+        order_data["timestamp"] = timestamp
+        order_data["status"] = "confirmed"
+        
+        with open(filename, "w") as f:
+            json.dump(order_data, f, indent=2)
+        
+        logger.info(f"Order saved to {filename}: {order_data}")
+        
+        return f"Perfect! Your order has been saved. Your {self.order.size} {self.order.drinkType} will be ready soon, {self.order.name}!"
+
+    @function_tool
+    async def update_order(
+        self,
+        context: RunContext,
+        drinkType: Optional[str] = None,
+        size: Optional[str] = None,
+        milk: Optional[str] = None,
+        extras: Optional[str] = None,
+        name: Optional[str] = None
+    ):
+        """Update the current order with customer information.
+        
+        Use this tool to record each piece of information as the customer provides it.
+        
+        Args:
+            drinkType: Type of coffee drink (e.g., latte, cappuccino, espresso)
+            size: Size of drink (small, medium, large)
+            milk: Milk preference (whole, 2%, oat, almond, soy, none)
+            extras: Any extras like whipped cream, extra shot, syrups (can be comma-separated)
+            name: Customer's name for the order
+        """
+        
+        if drinkType:
+            self.order.drinkType = drinkType
+        if size:
+            self.order.size = size.lower()
+        if milk:
+            self.order.milk = milk
+        if extras:
+            # Split comma-separated extras and add to list
+            new_extras = [e.strip() for e in extras.split(",")]
+            self.order.extras.extend(new_extras)
+        if name:
+            self.order.name = name
+        
+        # Build a summary of what we have so far
+        summary = []
+        if self.order.drinkType:
+            summary.append(f"Drink: {self.order.drinkType}")
+        if self.order.size:
+            summary.append(f"Size: {self.order.size}")
+        if self.order.milk:
+            summary.append(f"Milk: {self.order.milk}")
+        if self.order.extras:
+            summary.append(f"Extras: {', '.join(self.order.extras)}")
+        if self.order.name:
+            summary.append(f"Name: {self.order.name}")
+        
+        current_status = " | ".join(summary) if summary else "No order details yet"
+        
+        logger.info(f"Order updated: {current_status}")
+        
+        return f"Got it! Current order: {current_status}"
 
 
 def prewarm(proc: JobProcess):
