@@ -3,7 +3,7 @@ import json
 import os
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
-from typing import Optional
+from typing import Optional, List, Dict, Any
 
 from dotenv import load_dotenv
 from livekit.agents import (
@@ -27,23 +27,24 @@ logger = logging.getLogger("agent")
 
 load_dotenv(".env.local")
 
+WELLNESS_LOG_FILE = "wellness_log.json"
+
 
 @dataclass
-class OrderState:
-    """Tracks the current coffee order state"""
-    drinkType: Optional[str] = None
-    size: Optional[str] = None
-    milk: Optional[str] = None
-    extras: list[str] = field(default_factory=list)
-    name: Optional[str] = None
+class WellnessState:
+    """Tracks the current wellness check-in state"""
+    mood: Optional[str] = None
+    energy_level: Optional[str] = None
+    stress_factors: Optional[str] = None
+    objectives: List[str] = field(default_factory=list)
+    summary: Optional[str] = None
+    date: Optional[str] = None
     
     def is_complete(self) -> bool:
-        """Check if all required fields are filled"""
+        """Check if the check-in has enough information"""
         return all([
-            self.drinkType is not None,
-            self.size is not None,
-            self.milk is not None,
-            self.name is not None
+            self.mood is not None,
+            len(self.objectives) > 0
         ])
     
     def to_dict(self) -> dict:
@@ -51,127 +52,162 @@ class OrderState:
         return asdict(self)
 
 
-class Assistant(Agent):
+def load_wellness_history() -> List[Dict[str, Any]]:
+    """Load previous wellness check-ins from JSON file"""
+    if not os.path.exists(WELLNESS_LOG_FILE):
+        return []
+    
+    try:
+        with open(WELLNESS_LOG_FILE, "r") as f:
+            return json.load(f)
+    except Exception as e:
+        logger.error(f"Error loading wellness history: {e}")
+        return []
+
+
+def save_wellness_entry(entry: Dict[str, Any]) -> bool:
+    """Save a wellness check-in entry to JSON file"""
+    try:
+        history = load_wellness_history()
+        history.append(entry)
+        
+        with open(WELLNESS_LOG_FILE, "w") as f:
+            json.dump(history, f, indent=2)
+        
+        logger.info(f"Wellness entry saved: {entry}")
+        return True
+    except Exception as e:
+        logger.error(f"Error saving wellness entry: {e}")
+        return False
+
+
+def get_last_checkin_summary() -> Optional[str]:
+    """Get a summary of the last check-in for context"""
+    history = load_wellness_history()
+    if not history:
+        return None
+    
+    last_entry = history[-1]
+    return f"Last time on {last_entry.get('date', 'a previous day')}, you mentioned feeling {last_entry.get('mood', 'N/A')} with energy level of {last_entry.get('energy_level', 'N/A')}."
+
+
+class WellnessCompanion(Agent):
     def __init__(self) -> None:
+        # Load previous check-in for context
+        last_checkin = get_last_checkin_summary()
+        context_note = f"\n\nPrevious session context: {last_checkin}" if last_checkin else "\n\nThis appears to be the user's first check-in with you."
+        
         super().__init__(
-            instructions="""You are a warm, polite barista at Sukdeb Coffee Shop, a premium café known for its thoughtful and attentive service.
-            The customer is speaking with you by voice, so your responses should sound natural, relaxed, and easy to follow.
+            instructions=f"""You are a supportive and grounded health & wellness companion. Your role is to conduct brief daily check-ins to help users reflect on their wellbeing and set intentions.
 
-            Your task is to help the customer place their coffee order by gathering a few key details:
+You are NOT a medical professional. You do not diagnose, prescribe, or provide medical advice. You offer supportive listening and simple, practical suggestions for wellbeing.
 
-            1. The type of drink they'd like (for example: latte, cappuccino, espresso, americano, mocha, cold brew, etc.)
+Your conversation flow:
+1. Greet the user warmly and ask about their mood and energy today
+   - "How are you feeling today?"
+   - "What's your energy level like?"
+   - "Is anything stressing you out right now?"
 
-            2. The size (small, medium, or large)
+2. Ask about their intentions or objectives for the day
+   - "What are 1 to 3 things you'd like to get done today?"
+   - "Is there anything you want to do for yourself, like rest, exercise, or a hobby?"
 
-            3. Their preferred milk option (whole, 2%, oat, almond, soy, or no milk)
+3. Offer simple, realistic advice or reflections
+   - Keep suggestions small and actionable
+   - Examples: break large goals into smaller steps, take short breaks, go for a 5-minute walk
+   - Be encouraging but realistic
 
-            4. Any additional extras they might want (such as whipped cream, an extra shot, vanilla syrup, caramel syrup, etc.) — optional
+4. Close with a brief recap
+   - Summarize their mood and main objectives
+   - Ask: "Does this sound right?"
+   - Once confirmed, save the check-in
 
-            5. The customer's name for the order
-
-            Ask for this information one step at a time in a kind and patient manner.
-            If the customer isn't sure what they want, feel free to offer a few helpful suggestions.
-
-            After collecting all the details, read the full order back to the customer to make sure everything is correct before completing it.
-
-            Keep your tone courteous, warm, and welcoming, and avoid complex formatting or special characters."""
+Keep responses conversational, warm, and natural. Use voice-friendly language without complex formatting or emojis.{context_note}""",
         )
-        self.order = OrderState()
+        self.wellness = WellnessState()
+        self.wellness.date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
 
     @function_tool
-    async def save_order(self, context: RunContext):
-        """Save the completed coffee order to a JSON file.
-        
-        Use this tool ONLY when you have confirmed all the order details with the customer
-        and they have approved the final order.
-        """
-        
-        if not self.order.is_complete():
-            missing = []
-            if not self.order.drinkType:
-                missing.append("drink type")
-            if not self.order.size:
-                missing.append("size")
-            if not self.order.milk:
-                missing.append("milk preference")
-            if not self.order.name:
-                missing.append("customer name")
-            
-            return f"Cannot save order. Missing: {', '.join(missing)}"
-        
-        # Create orders directory if it doesn't exist
-        orders_dir = "orders"
-        os.makedirs(orders_dir, exist_ok=True)
-        
-        # Generate filename with timestamp
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{orders_dir}/order_{timestamp}_{self.order.name.replace(' ', '_')}.json"
-        
-        # Save order to JSON file
-        order_data = self.order.to_dict()
-        order_data["timestamp"] = timestamp
-        order_data["status"] = "confirmed"
-        
-        with open(filename, "w") as f:
-            json.dump(order_data, f, indent=2)
-        
-        logger.info(f"Order saved to {filename}: {order_data}")
-        
-        return f"Perfect! Your order has been saved. Your {self.order.size} {self.order.drinkType} will be ready soon, {self.order.name}!"
-
-    @function_tool
-    async def update_order(
+    async def update_wellness_checkin(
         self,
         context: RunContext,
-        drinkType: Optional[str] = None,
-        size: Optional[str] = None,
-        milk: Optional[str] = None,
-        extras: Optional[str] = None,
-        name: Optional[str] = None
+        mood: Optional[str] = None,
+        energy_level: Optional[str] = None,
+        stress_factors: Optional[str] = None,
+        objectives: Optional[str] = None
     ):
-        """Update the current order with customer information.
+        """Record wellness check-in information as the user shares it.
         
-        Use this tool to record each piece of information as the customer provides it.
+        Use this tool to capture what the user tells you about their wellbeing and goals.
         
         Args:
-            drinkType: Type of coffee drink (e.g., latte, cappuccino, espresso)
-            size: Size of drink (small, medium, large)
-            milk: Milk preference (whole, 2%, oat, almond, soy, none)
-            extras: Any extras like whipped cream, extra shot, syrups (can be comma-separated)
-            name: Customer's name for the order
+            mood: User's self-reported mood or emotional state
+            energy_level: User's energy level (e.g., low, medium, high, tired, energized)
+            stress_factors: What's causing stress or concern (optional)
+            objectives: Goals or intentions for the day (can be comma-separated for multiple objectives)
         """
         
-        if drinkType:
-            self.order.drinkType = drinkType
-        if size:
-            self.order.size = size.lower()
-        if milk:
-            self.order.milk = milk
-        if extras:
-            # Split comma-separated extras and add to list
-            new_extras = [e.strip() for e in extras.split(",")]
-            self.order.extras.extend(new_extras)
-        if name:
-            self.order.name = name
+        if mood:
+            self.wellness.mood = mood
+        if energy_level:
+            self.wellness.energy_level = energy_level
+        if stress_factors:
+            self.wellness.stress_factors = stress_factors
+        if objectives:
+            # Parse objectives (handle comma-separated or single objective)
+            new_objectives = [obj.strip() for obj in objectives.split(",") if obj.strip()]
+            self.wellness.objectives.extend(new_objectives)
         
-        # Build a summary of what we have so far
-        summary = []
-        if self.order.drinkType:
-            summary.append(f"Drink: {self.order.drinkType}")
-        if self.order.size:
-            summary.append(f"Size: {self.order.size}")
-        if self.order.milk:
-            summary.append(f"Milk: {self.order.milk}")
-        if self.order.extras:
-            summary.append(f"Extras: {', '.join(self.order.extras)}")
-        if self.order.name:
-            summary.append(f"Name: {self.order.name}")
+        # Build current status summary
+        status_parts = []
+        if self.wellness.mood:
+            status_parts.append(f"Mood: {self.wellness.mood}")
+        if self.wellness.energy_level:
+            status_parts.append(f"Energy: {self.wellness.energy_level}")
+        if self.wellness.stress_factors:
+            status_parts.append(f"Stress: {self.wellness.stress_factors}")
+        if self.wellness.objectives:
+            status_parts.append(f"Objectives: {', '.join(self.wellness.objectives)}")
         
-        current_status = " | ".join(summary) if summary else "No order details yet"
+        current_status = " | ".join(status_parts) if status_parts else "No information recorded yet"
         
-        logger.info(f"Order updated: {current_status}")
+        logger.info(f"Wellness check-in updated: {current_status}")
         
-        return f"Got it! Current order: {current_status}"
+        return f"Recorded. Current check-in: {current_status}"
+
+    @function_tool
+    async def save_wellness_checkin(self, context: RunContext, summary: str):
+        """Save the completed wellness check-in to the JSON log file.
+        
+        Use this tool ONLY after you have:
+        1. Gathered mood and objectives
+        2. Provided your recap
+        3. Received confirmation from the user that the recap is correct
+        
+        Args:
+            summary: A brief one-sentence summary of the check-in from your perspective
+        """
+        
+        if not self.wellness.is_complete():
+            missing = []
+            if not self.wellness.mood:
+                missing.append("mood")
+            if len(self.wellness.objectives) == 0:
+                missing.append("at least one objective")
+            
+            return f"Cannot save check-in yet. Still need: {', '.join(missing)}"
+        
+        # Add the summary
+        self.wellness.summary = summary
+        
+        # Convert to dict and save
+        entry = self.wellness.to_dict()
+        
+        if save_wellness_entry(entry):
+            objectives_list = ', '.join(self.wellness.objectives)
+            return f"Your check-in has been saved! Wishing you a great day working on: {objectives_list}"
+        else:
+            return "There was an issue saving your check-in, but I've noted everything we discussed."
 
 
 def prewarm(proc: JobProcess):
@@ -247,7 +283,7 @@ async def entrypoint(ctx: JobContext):
 
     # Start the session, which initializes the voice pipeline and warms up the models
     await session.start(
-        agent=Assistant(),
+        agent=WellnessCompanion(),
         room=ctx.room,
         room_input_options=RoomInputOptions(
             # For telephony applications, use `BVCTelephony` for best results

@@ -1,0 +1,28 @@
+[
+  {
+    "mood": "tired",
+    "energy_level": "a little tired",
+    "stress_factors": "didn't sleep well last night because of a class assignment",
+    "objectives": [
+      "done my classes and assignments"
+    ],
+    "summary": "User is feeling tired with low energy due to lack of sleep from a class assignment. Despite this, they completed their classes and assignments for the day.",
+    "date": "2025-11-23 22:08:19"
+  },
+  {
+    "mood": "good",
+    "energy_level": "high",
+    "stress_factors": null,
+    "objectives": [
+      "study",
+      "clean my room",
+      "and work on a small project",
+      "study",
+      "clean my room",
+      "work on a small project",
+      "and listen to music in the evening"
+    ],
+    "summary": "Mood: Good, Energy: High. Objectives: Study, clean room, work on a small project, and listen to music in the evening.",
+    "date": "2025-11-23 22:30:06"
+  }
+]
