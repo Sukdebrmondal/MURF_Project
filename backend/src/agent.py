@@ -4,6 +4,7 @@ import os
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from typing import Optional
+## Load environment variables from .env.local
 
 from dotenv import load_dotenv
 from livekit.agents import (
