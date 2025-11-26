@@ -1,0 +1,83 @@
+{
+  "company": {
+    "name": "GO Classes",
+    "tagline": "Go to the Root of Concept, Not Rote the Concept.",
+    "description": "GO Classes is an online learning platform created by alumni of IISc and top IITs, in collaboration with GATE Overflow. It focuses on deep, concept-first preparation for GATE CSE, GATE Data Science & AI (DA), and related Computer Science exams like UGC NET. Students learn through in-depth lectures, structured courses, PYQ analysis, and rigorous practice so they can truly understand core CS subjects and aim for top ranks."
+  },
+  "products": [
+    {
+      "name": "GATE CSE Complete Course",
+      "description": "A full GATE CSE preparation program for upcoming attempts (2026 / 2027 / 2028) covering all core subjects like Algorithms, Data Structures, OS, DBMS, CN, TOC, COA, and Engineering Mathematics with in-depth lectures, homework, PYQs, and regular tests."
+    },
+    {
+      "name": "GATE DA Complete Course",
+      "description": "Complete GATE Data Science and AI preparation course with detailed coverage of probability, statistics, linear algebra, ML fundamentals, and all DA-specific topics, designed and taught by IISc alumni."
+    },
+    {
+      "name": "GATE CSE + DA Combo Complete Course",
+      "description": "A combo program for students targeting both GATE CSE and GATE DA. Gives access to the entire CSE and DA content, practice, and tests in one combined package."
+    },
+    {
+      "name": "Test Series & Quizzes",
+      "description": "Dedicated test series and weekly quizzes for GATE CSE and GATE DA that include chapter-wise tests, mixed quizzes, and full-length mock exams with detailed analysis, ranks, and solutions."
+    },
+    {
+      "name": "Free Foundation Courses",
+      "description": "Free courses such as Discrete Mathematics, Engineering Mathematics, Linear Algebra for DA, and curated YouTube content for GATE CSE and GATE DA. These help students start learning core concepts without any upfront cost."
+    },
+    {
+      "name": "UGC NET CS Practice & PYQs",
+      "description": "Dedicated practice content and PYQ discussions that are helpful for UGC NET (Computer Science) along with GATE-focused lectures for subjects like Digital Logic, Computer Networks, Operating Systems, and more."
+    }
+  ],
+  "pricing": {
+    "gate_cse_complete": "Around ₹14,999 including GST for the GATE CSE Complete Course (discounted price; original MRP is higher).",
+    "gate_da_complete": "Around ₹9,999-₹27,999 including GST for the GATE DA Complete Course, depending on batch and offer.",
+    "gate_combo": "Around ₹18,999 including GST for the combined GATE CSE + DA Complete Course combo (discounted from a higher MRP).",
+    "test_series": "Test series and quizzes typically range from about ₹900 (single exam series) up to around ₹3,200 for combined CS/DA packages, depending on the offering.",
+    "free_courses": "Free Discrete Mathematics, Engineering Mathematics, some Linear Algebra and UGC NET-relevant content, plus full YouTube channels for GATE CSE and GATE DA.",
+    "note": "Exact prices and discounts may change over time. Learners should always check the official GO Classes website or app for the latest fees and offers."
+  },
+  "faq": [
+    {
+      "question": "What is GO Classes?",
+      "answer": "GO Classes is an online coaching platform started by IISc and top IIT alumni in collaboration with GATE Overflow. It focuses on deep, concept-first teaching for GATE CSE, GATE Data Science & AI, and related Computer Science exams. The goal is to help students truly understand core CS subjects instead of rote memorisation."
+    },
+    {
+      "question": "Who is GO Classes for?",
+      "answer": "GO Classes is ideal for serious aspirants of GATE CSE, GATE DA, and UGC NET Computer Science. It works well for B.Tech students in any year, M.Sc or M.Tech students, and working professionals who want structured, high-quality content and strong fundamentals to target top ranks."
+    },
+    {
+      "question": "Do you offer free courses?",
+      "answer": "Yes. GO Classes offers free, full-length courses in subjects like Discrete Mathematics and Engineering Mathematics, along with free Linear Algebra content for DA and structured free content on YouTube. Students can start their preparation and check the teaching style at zero cost and later decide to join the complete paid courses or test series."
+    },
+    {
+      "question": "What is included in the paid complete courses?",
+      "answer": "The complete courses include detailed video lectures for every topic, daily or regular homework sets with solutions, GATE PYQ discussion videos, weekly quizzes, test series access, doubt support via community platforms, and long-term access through the app or website. The focus is on clear explanations, proofs, intuitions, and problem-solving rather than shortcut-only teaching."
+    },
+    {
+      "question": "How much do GO Classes courses cost?",
+      "answer": "As of the latest information, the GATE CSE Complete Course is priced around ₹14,999 including GST, GATE DA Complete Course is around ₹9,999–₹27,999 depending on the plan, and the GATE CSE + DA Combo is around ₹18,999 including GST. Test series and quizzes are cheaper and typically range from under ₹1,000 to a few thousand rupees. Prices and offers may change, so it is best to check the official website or app for current fees."
+    },
+    {
+      "question": "Do you have a test series for GATE?",
+      "answer": "Yes, GO Classes provides a dedicated test series and quizzes for both GATE CSE and GATE DA. These include topic-wise quizzes, weekly quizzes, and full-length mock tests that simulate the real exam, with detailed analysis and ranks to help students measure and improve their performance."
+    },
+    {
+      "question": "Can GO Classes help with UGC NET Computer Science?",
+      "answer": "While GO Classes is primarily focused on GATE CSE and DA, the depth and style of teaching, along with PYQ discussions and DPPs in subjects like Digital Logic, Computer Networks, Operating Systems, TOC, and others, are also highly relevant for UGC NET Computer Science. Many resources and practice questions are useful for both exams."
+    },
+    {
+      "question": "How is GO Classes different from other coaching platforms?",
+      "answer": "GO Classes emphasises rigorous concept-building with proofs, intuition, and ideas, rather than only formula-based shortcuts. The faculty are IISc and IIT alumni with strong AIRs in GATE and real teaching experience. The courses also integrate homework, PYQ analysis, and community-driven doubt solving with GATE Overflow, which creates a strong learning ecosystem."
+    },
+    {
+      "question": "Is there doubt-solving support?",
+      "answer": "Yes. Doubts can typically be discussed through community platforms, structured groups, and discussions linked with GO Classes and GATE Overflow. Students can ask questions on practice sets, PYQs, or conceptual doubts and get guided clarifications."
+    },
+    {
+      "question": "How can I contact GO Classes?",
+      "answer": "Students can contact GO Classes through the official website contact form, the published support email, or phone number. These details are available on the GO Classes homepage and in the app, and can be used for queries related to admission, technical support, or course selection."
+    }
+  ]
+}
