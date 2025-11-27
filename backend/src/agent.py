@@ -1,9 +1,5 @@
 import logging
-import json
-import os
-from dataclasses import dataclass, field, asdict
 from datetime import datetime
-from typing import Optional
 
 from dotenv import load_dotenv
 from livekit.agents import (
@@ -23,155 +19,208 @@ from livekit.agents import (
 from livekit.plugins import murf, silero, google, deepgram, noise_cancellation
 from livekit.plugins.turn_detector.multilingual import MultilingualModel
 
+# Import database functions
+from database import (
+    init_database,
+    get_fraud_case_by_username,
+    verify_security_identifier,
+    verify_security_answer,
+    update_fraud_case_status
+)
+
 logger = logging.getLogger("agent")
 
 load_dotenv(".env.local")
 
+# Initialize database on module load
+init_database()
 
-@dataclass
-class OrderState:
-    """Tracks the current coffee order state"""
-    drinkType: Optional[str] = None
-    size: Optional[str] = None
-    milk: Optional[str] = None
-    extras: list[str] = field(default_factory=list)
-    name: Optional[str] = None
-    
-    def is_complete(self) -> bool:
-        """Check if all required fields are filled"""
-        return all([
-            self.drinkType is not None,
-            self.size is not None,
-            self.milk is not None,
-            self.name is not None
-        ])
-    
-    def to_dict(self) -> dict:
-        """Convert to dictionary for JSON serialization"""
-        return asdict(self)
 
 
 class Assistant(Agent):
     def __init__(self) -> None:
         super().__init__(
-            instructions="""You are a warm, polite barista at Sukdeb Coffee Shop, a premium café known for its thoughtful and attentive service.
-            The customer is speaking with you by voice, so your responses should sound natural, relaxed, and easy to follow.
-
-            Your task is to help the customer place their coffee order by gathering a few key details:
-
-            1. The type of drink they'd like (for example: latte, cappuccino, espresso, americano, mocha, cold brew, etc.)
-
-            2. The size (small, medium, or large)
-
-            3. Their preferred milk option (whole, 2%, oat, almond, soy, or no milk)
-
-            4. Any additional extras they might want (such as whipped cream, an extra shot, vanilla syrup, caramel syrup, etc.) — optional
-
-            5. The customer's name for the order
-
-            Ask for this information one step at a time in a kind and patient manner.
-            If the customer isn't sure what they want, feel free to offer a few helpful suggestions.
-
-            After collecting all the details, read the full order back to the customer to make sure everything is correct before completing it.
-
-            Keep your tone courteous, warm, and welcoming, and avoid complex formatting or special characters."""
-        )
-        self.order = OrderState()
-
-    @function_tool
-    async def save_order(self, context: RunContext):
-        """Save the completed coffee order to a JSON file.
-        
-        Use this tool ONLY when you have confirmed all the order details with the customer
-        and they have approved the final order.
-        """
-        
-        if not self.order.is_complete():
-            missing = []
-            if not self.order.drinkType:
-                missing.append("drink type")
-            if not self.order.size:
-                missing.append("size")
-            if not self.order.milk:
-                missing.append("milk preference")
-            if not self.order.name:
-                missing.append("customer name")
+            instructions="""You are Amit, a fraud detection representative from UBI Bank's (Union Bank of India) fraud prevention department. 
+            The user is interacting with you via voice.
             
-            return f"Cannot save order. Missing: {', '.join(missing)}"
+            Your role is to:
+            1. Introduce yourself professionally as Amit calling from UBI Bank's fraud department
+            2. Verify the customer's identity using their username and security identifier
+            3. Ask the security question from their file to confirm their identity
+            4. Explain the suspicious transaction clearly and calmly
+            5. Ask if they made the transaction (yes or no)
+            6. Take appropriate action based on their response
+            
+            CALL FLOW:
+            - Start by greeting them and introducing yourself as Amit from UBI Bank fraud department
+            - Ask for their name (username)
+            - Use load_fraud_case tool to get their fraud case details
+            - Ask for their security identifier to verify identity
+            - Use verify_identifier tool to check it
+            - If verification fails, politely end the call using mark_verification_failed tool
+            - If verified, ask the security question from their case
+            - Use verify_security_answer tool to check their answer
+            - If answer is wrong, politely end the call using mark_verification_failed tool
+            - If answer is correct, read out the suspicious transaction details
+            - Ask clearly: "Did you make this transaction?"
+            - Based on their yes/no answer:
+              * If YES: Use mark_transaction_safe tool
+              * If NO: Use mark_transaction_fraudulent tool
+            - Confirm the action taken and thank them
+            
+            Keep responses concise, professional, and reassuring.
+            Never ask for full card numbers, PINs, or passwords.
+            Use the provided tools to load cases and update statuses.""",
+        )
         
-        # Create orders directory if it doesn't exist
-        orders_dir = "orders"
-        os.makedirs(orders_dir, exist_ok=True)
-        
-        # Generate filename with timestamp
-        timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
-        filename = f"{orders_dir}/order_{timestamp}_{self.order.name.replace(' ', '_')}.json"
-        
-        # Save order to JSON file
-        order_data = self.order.to_dict()
-        order_data["timestamp"] = timestamp
-        order_data["status"] = "confirmed"
-        
-        with open(filename, "w") as f:
-            json.dump(order_data, f, indent=2)
-        
-        logger.info(f"Order saved to {filename}: {order_data}")
-        
-        return f"Perfect! Your order has been saved. Your {self.order.size} {self.order.drinkType} will be ready soon, {self.order.name}!"
+        # Store current fraud case context
+        self.current_case = None
+        self.current_username = None
 
     @function_tool
-    async def update_order(
-        self,
-        context: RunContext,
-        drinkType: Optional[str] = None,
-        size: Optional[str] = None,
-        milk: Optional[str] = None,
-        extras: Optional[str] = None,
-        name: Optional[str] = None
-    ):
-        """Update the current order with customer information.
+    async def load_fraud_case(self, context: RunContext, username: str):
+        """Load the pending fraud case for a specific user.
         
-        Use this tool to record each piece of information as the customer provides it.
+        This tool retrieves fraud case details from the database for the given username.
+        Use this after the user provides their name.
         
         Args:
-            drinkType: Type of coffee drink (e.g., latte, cappuccino, espresso)
-            size: Size of drink (small, medium, large)
-            milk: Milk preference (whole, 2%, oat, almond, soy, none)
-            extras: Any extras like whipped cream, extra shot, syrups (can be comma-separated)
-            name: Customer's name for the order
+            username: The customer's name
         """
+        logger.info(f"Loading fraud case for username: {username}")
         
-        if drinkType:
-            self.order.drinkType = drinkType
-        if size:
-            self.order.size = size.lower()
-        if milk:
-            self.order.milk = milk
-        if extras:
-            # Split comma-separated extras and add to list
-            new_extras = [e.strip() for e in extras.split(",")]
-            self.order.extras.extend(new_extras)
-        if name:
-            self.order.name = name
+        case = get_fraud_case_by_username(username)
         
-        # Build a summary of what we have so far
-        summary = []
-        if self.order.drinkType:
-            summary.append(f"Drink: {self.order.drinkType}")
-        if self.order.size:
-            summary.append(f"Size: {self.order.size}")
-        if self.order.milk:
-            summary.append(f"Milk: {self.order.milk}")
-        if self.order.extras:
-            summary.append(f"Extras: {', '.join(self.order.extras)}")
-        if self.order.name:
-            summary.append(f"Name: {self.order.name}")
+        if case:
+            self.current_case = case
+            # Store the actual username from database, not user input
+            self.current_username = case['userName']
+            logger.info(f"Loaded case: {case}")
+            
+            return f"""Fraud case loaded for {username}.
+Card ending: {case['cardEnding']}
+Transaction: ${case['transactionAmount']} at {case['transactionName']}
+Category: {case['transactionCategory']}
+Location: {case['transactionLocation']}
+Time: {case['transactionTime']}
+Source: {case['transactionSource']}
+Security Question: {case['securityQuestion']}
+
+Now verify their security identifier before proceeding."""
+        else:
+            logger.warning(f"No pending fraud case found for {username}")
+            return f"No pending fraud alert found for {username}. This call may be in error."
+
+    @function_tool
+    async def verify_identifier(self, context: RunContext, identifier: str):
+        """Verify the customer's security identifier.
         
-        current_status = " | ".join(summary) if summary else "No order details yet"
+        Use this tool after the user provides their security identifier to verify their identity.
         
-        logger.info(f"Order updated: {current_status}")
+        Args:
+            identifier: The security identifier provided by the customer
+        """
+        if not self.current_username:
+            return "Error: No fraud case loaded yet. Ask for username first."
         
-        return f"Got it! Current order: {current_status}"
+        logger.info(f"Verifying identifier for {self.current_username}: {identifier}")
+        
+        is_valid = verify_security_identifier(self.current_username, identifier)
+        
+        if is_valid:
+            return "Security identifier verified successfully. Now ask the security question."
+        else:
+            return "Security identifier does not match. Identity verification failed."
+
+    @function_tool
+    async def verify_security_answer(self, context: RunContext, answer: str):
+        """Verify the customer's answer to the security question.
+        
+        Use this tool after the customer answers the security question.
+        
+        Args:
+            answer: The customer's answer to the security question
+        """
+        if not self.current_username or not self.current_case:
+            return "Error: No fraud case loaded yet."
+        
+        logger.info(f"Verifying security answer for {self.current_username}")
+        
+        is_correct = verify_security_answer(self.current_username, answer)
+        
+        if is_correct:
+            return "Security answer verified. Identity confirmed. Now read out the transaction details and ask if they made the purchase."
+        else:
+            return "Security answer incorrect. Identity verification failed."
+
+    @function_tool
+    async def mark_transaction_safe(self, context: RunContext):
+        """Mark the transaction as safe (customer confirmed they made it).
+        
+        Use this tool when the customer confirms YES, they made the transaction.
+        """
+        if not self.current_username:
+            return "Error: No fraud case loaded."
+        
+        logger.info(f"Marking transaction as safe for {self.current_username}")
+        
+        outcome = "Customer confirmed transaction as legitimate."
+        success = update_fraud_case_status(
+            self.current_username,
+            "confirmed_safe",
+            outcome
+        )
+        
+        if success:
+            return f"Transaction marked as safe. No further action needed. Thank the customer and end the call."
+        else:
+            return "Error updating case status."
+
+    @function_tool
+    async def mark_transaction_fraudulent(self, context: RunContext):
+        """Mark the transaction as fraudulent (customer denied making it).
+        
+        Use this tool when the customer confirms NO, they did NOT make the transaction.
+        """
+        if not self.current_username:
+            return "Error: No fraud case loaded."
+        
+        logger.info(f"Marking transaction as fraudulent for {self.current_username}")
+        
+        outcome = f"Customer denied transaction. Card ending {self.current_case['cardEnding']} has been blocked. Dispute case opened."
+        success = update_fraud_case_status(
+            self.current_username,
+            "confirmed_fraud",
+            outcome
+        )
+        
+        if success:
+            return f"Transaction marked as fraudulent. Card has been blocked and dispute opened. Inform the customer and thank them for reporting this."
+        else:
+            return "Error updating case status."
+
+    @function_tool
+    async def mark_verification_failed(self, context: RunContext):
+        """Mark the case as verification failed.
+        
+        Use this tool when identity verification fails (wrong identifier or security answer).
+        """
+        if not self.current_username:
+            return "No case to mark."
+        
+        logger.info(f"Marking verification failed for {self.current_username}")
+        
+        outcome = "Identity verification failed during fraud alert call."
+        success = update_fraud_case_status(
+            self.current_username,
+            "verification_failed",
+            outcome
+        )
+        
+        if success:
+            return "Verification marked as failed. Politely end the call and suggest they contact the bank directly."
+        else:
+            return "Error updating case status."
 
 
 def prewarm(proc: JobProcess):
