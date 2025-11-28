@@ -1,0 +1,16 @@
+{
+  "order_id": "ORD20251128191452",
+  "customer_name": "Amit Mandal",
+  "timestamp": "2025-11-28T19:14:52.795715",
+  "items": [
+    {
+      "item_id": "chips_classic",
+      "name": "Classic Salted Chips",
+      "quantity": 2,
+      "price_per_unit": 20,
+      "total": 40
+    }
+  ],
+  "total": 40,
+  "status": "received"
+}

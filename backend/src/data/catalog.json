@@ -1,0 +1,337 @@
+{
+  "items": [
+    {
+      "id": "bread_whole_wheat",
+      "name": "Whole Wheat Bread",
+      "category": "Groceries",
+      "price": 45,
+      "brand": "Harvest Gold",
+      "size": "400g",
+      "tags": ["vegetarian"]
+    },
+    {
+      "id": "bread_white",
+      "name": "White Bread",
+      "category": "Groceries",
+      "price": 40,
+      "brand": "Modern",
+      "size": "400g",
+      "tags": ["vegetarian"]
+    },
+    {
+      "id": "milk_full_cream",
+      "name": "Full Cream Milk",
+      "category": "Groceries",
+      "price": 60,
+      "brand": "Amul",
+      "size": "1L",
+      "tags": ["vegetarian", "dairy"]
+    },
+    {
+      "id": "eggs_brown",
+      "name": "Brown Eggs",
+      "category": "Groceries",
+      "price": 90,
+      "brand": "Keggs",
+      "size": "12 pieces",
+      "tags": ["protein"]
+    },
+    {
+      "id": "peanut_butter",
+      "name": "Peanut Butter",
+      "category": "Groceries",
+      "price": 250,
+      "brand": "Sundrop",
+      "size": "500g",
+      "tags": ["vegetarian", "protein"]
+    },
+    {
+      "id": "pasta_penne",
+      "name": "Penne Pasta",
+      "category": "Groceries",
+      "price": 120,
+      "brand": "Borges",
+      "size": "500g",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "pasta_sauce",
+      "name": "Marinara Pasta Sauce",
+      "category": "Groceries",
+      "price": 180,
+      "brand": "Kissan",
+      "size": "400g",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "cheese_cheddar",
+      "name": "Cheddar Cheese",
+      "category": "Groceries",
+      "price": 200,
+      "brand": "Amul",
+      "size": "200g",
+      "tags": ["vegetarian", "dairy"]
+    },
+    {
+      "id": "rice_basmati",
+      "name": "Basmati Rice",
+      "category": "Groceries",
+      "price": 180,
+      "brand": "India Gate",
+      "size": "1kg",
+      "tags": ["vegetarian", "vegan", "gluten-free"]
+    },
+    {
+      "id": "tomatoes",
+      "name": "Fresh Tomatoes",
+      "category": "Groceries",
+      "price": 40,
+      "brand": "Fresh Farm",
+      "size": "500g",
+      "tags": ["vegetarian", "vegan", "fresh"]
+    },
+    {
+      "id": "onions",
+      "name": "Fresh Onions",
+      "category": "Groceries",
+      "price": 35,
+      "brand": "Fresh Farm",
+      "size": "500g",
+      "tags": ["vegetarian", "vegan", "fresh"]
+    },
+    {
+      "id": "lettuce",
+      "name": "Iceberg Lettuce",
+      "category": "Groceries",
+      "price": 50,
+      "brand": "Fresh Farm",
+      "size": "1 head",
+      "tags": ["vegetarian", "vegan", "fresh"]
+    },
+    {
+      "id": "chips_classic",
+      "name": "Classic Salted Chips",
+      "category": "Snacks",
+      "price": 20,
+      "brand": "Lays",
+      "size": "50g",
+      "tags": ["vegetarian"]
+    },
+    {
+      "id": "cookies_chocolate",
+      "name": "Chocolate Chip Cookies",
+      "category": "Snacks",
+      "price": 30,
+      "brand": "Britannia",
+      "size": "100g",
+      "tags": ["vegetarian"]
+    },
+    {
+      "id": "juice_orange",
+      "name": "Orange Juice",
+      "category": "Snacks",
+      "price": 80,
+      "brand": "Tropicana",
+      "size": "1L",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "pizza_margherita",
+      "name": "Margherita Pizza",
+      "category": "Prepared Food",
+      "price": 350,
+      "brand": "Chef's Special",
+      "size": "Medium",
+      "tags": ["vegetarian", "ready-to-eat"]
+    },
+    {
+      "id": "sandwich_veg",
+      "name": "Vegetable Sandwich",
+      "category": "Prepared Food",
+      "price": 120,
+      "brand": "Chef's Special",
+      "size": "1 piece",
+      "tags": ["vegetarian", "ready-to-eat"]
+    },
+    {
+      "id": "burger_veg",
+      "name": "Veggie Burger",
+      "category": "Prepared Food",
+      "price": 150,
+      "brand": "Chef's Special",
+      "size": "1 piece",
+      "tags": ["vegetarian", "ready-to-eat"]
+    },
+    {
+      "id": "salad_greek",
+      "name": "Greek Salad",
+      "category": "Prepared Food",
+      "price": 180,
+      "brand": "Chef's Special",
+      "size": "Large bowl",
+      "tags": ["vegetarian", "fresh", "healthy"]
+    },
+    {
+      "id": "butter",
+      "name": "Butter",
+      "category": "Groceries",
+      "price": 60,
+      "brand": "Amul",
+      "size": "100g",
+      "tags": ["vegetarian", "dairy"]
+    },
+    {
+      "id": "olive_oil",
+      "name": "Extra Virgin Olive Oil",
+      "category": "Groceries",
+      "price": 450,
+      "brand": "Figaro",
+      "size": "500ml",
+      "tags": ["vegetarian", "vegan"]
+    },
+    {
+      "id": "cucumber",
+      "name": "Fresh Cucumber",
+      "category": "Groceries",
+      "price": 30,
+      "brand": "Fresh Farm",
+      "size": "500g",
+      "tags": ["vegetarian", "vegan", "fresh"]
+    },
+    {
+      "id": "banana",
+      "name": "Fresh Bananas",
+      "category": "Groceries",
+      "price": 55,
+      "brand": "Fresh Farm",
+      "size": "1kg",
+      "tags": ["vegetarian", "vegan", "fresh"]
+    },
+    {
+      "id": "apple_red",
+      "name": "Red Apples",
+      "category": "Groceries",
+      "price": 120,
+      "brand": "Fresh Farm",
+      "size": "1kg",
+      "tags": ["vegetarian", "vegan", "fresh"]
+    },
+    {
+      "id": "yogurt_plain",
+      "name": "Plain Yogurt",
+      "category": "Groceries",
+      "price": 25,
+      "brand": "Amul",
+      "size": "100g",
+      "tags": ["vegetarian", "dairy"]
+    },
+    {
+      "id": "noodles_instant",
+      "name": "Instant Noodles",
+      "category": "Groceries",
+      "price": 15,
+      "brand": "Maggi",
+      "size": "70g",
+      "tags": ["vegetarian"]
+    },
+    {
+      "id": "tea_bag",
+      "name": "Tea Bags",
+      "category": "Groceries",
+      "price": 150,
+      "brand": "Taj Mahal",
+      "size": "100 bags",
+      "tags": ["vegetarian"]
+    },
+    {
+      "id": "coffee_instant",
+      "name": "Instant Coffee",
+      "category": "Groceries",
+      "price": 300,
+      "brand": "Nescafe",
+      "size": "200g",
+      "tags": ["vegetarian"]
+    },
+    {
+      "id": "chicken_frozen",
+      "name": "Frozen Chicken",
+      "category": "Groceries",
+      "price": 230,
+      "brand": "FreshMeat Co.",
+      "size": "1kg",
+      "tags": ["protein"]
+    },
+    {
+      "id": "paneer",
+      "name": "Paneer Cubes",
+      "category": "Groceries",
+      "price": 90,
+      "brand": "Amul",
+      "size": "200g",
+      "tags": ["vegetarian", "protein", "dairy"]
+    },
+    {
+      "id": "buttermilk",
+      "name": "Masala Buttermilk",
+      "category": "Snacks",
+      "price": 20,
+      "brand": "Amul",
+      "size": "250ml",
+      "tags": ["vegetarian", "dairy"]
+    },
+    {
+      "id": "biscuit_marie",
+      "name": "Marie Biscuits",
+      "category": "Snacks",
+      "price": 35,
+      "brand": "Britannia",
+      "size": "200g",
+      "tags": ["vegetarian"]
+    },
+    {
+      "id": "icecream_vanilla",
+      "name": "Vanilla Ice Cream",
+      "category": "Snacks",
+      "price": 160,
+      "brand": "Amul",
+      "size": "1L",
+      "tags": ["vegetarian", "dairy"]
+    },
+    {
+      "id": "soup_tomato",
+      "name": "Tomato Soup Pack",
+      "category": "Prepared Food",
+      "price": 55,
+      "brand": "Knorr",
+      "size": "50g",
+      "tags": ["vegetarian"]
+    },
+    {
+      "id": "biryani_veg",
+      "name": "Veg Biryani",
+      "category": "Prepared Food",
+      "price": 180,
+      "brand": "Chef's Special",
+      "size": "500g",
+      "tags": ["vegetarian", "ready-to-eat"]
+    },
+    {
+      "id": "pasta_alfredo",
+      "name": "Creamy Alfredo Pasta",
+      "category": "Prepared Food",
+      "price": 220,
+      "brand": "Chef's Special",
+      "size": "Large Bowl",
+      "tags": ["vegetarian", "ready-to-eat"]
+    },
+    {
+      "id": "fruit_salad",
+      "name": "Fresh Fruit Salad",
+      "category": "Prepared Food",
+      "price": 100,
+      "brand": "Chef's Special",
+      "size": "Medium Bowl",
+      "tags": ["vegetarian", "vegan", "fresh"]
+    }
+  ]
+}

@@ -1,0 +1,92 @@
+{
+  "recipes": {
+    "peanut butter sandwich": {
+      "items": ["bread_whole_wheat", "peanut_butter"],
+      "description": "Classic peanut butter sandwich"
+    },
+    "pb sandwich": {
+      "items": ["bread_whole_wheat", "peanut_butter"],
+      "description": "Classic peanut butter sandwich"
+    },
+    "pasta": {
+      "items": ["pasta_penne", "pasta_sauce", "cheese_cheddar"],
+      "description": "Simple pasta with marinara sauce and cheese"
+    },
+    "pasta for two": {
+      "items": ["pasta_penne", "pasta_sauce", "cheese_cheddar"],
+      "description": "Pasta meal for two people"
+    },
+    "greek salad": {
+      "items": ["lettuce", "tomatoes", "cucumber", "olive_oil"],
+      "description": "Fresh Greek salad"
+    },
+    "salad": {
+      "items": ["lettuce", "tomatoes", "cucumber", "olive_oil"],
+      "description": "Fresh vegetable salad"
+    },
+    "breakfast": {
+      "items": ["bread_white", "eggs_brown", "milk_full_cream", "butter"],
+      "description": "Basic breakfast items"
+    },
+    "sandwich ingredients": {
+      "items": ["bread_whole_wheat", "tomatoes", "cucumber", "cheese_cheddar"],
+      "description": "Ingredients for a fresh vegetable sandwich"
+    },
+    "pizza night": {
+      "items": ["pizza_margherita", "chips_classic", "juice_orange"],
+      "description": "Pizza night combo"
+    },
+    "movie snacks": {
+      "items": ["chips_classic", "cookies_chocolate", "juice_orange"],
+      "description": "Snacks for movie time"
+    },
+    "fruit bowl": {
+      "items": ["banana", "apple_red"],
+      "description": "Fresh mixed fruit bowl"
+    },
+    "masala tea": {
+      "items": ["tea_bag", "milk_full_cream"],
+      "description": "Simple Indian-style masala tea"
+    },
+    "coffee break": {
+      "items": ["coffee_instant", "milk_full_cream", "cookies_chocolate"],
+      "description": "Coffee with chocolate cookies"
+    },
+    "paneer sandwich": {
+      "items": ["bread_whole_wheat", "paneer", "tomatoes", "cucumber"],
+      "description": "Protein-rich paneer vegetable sandwich"
+    },
+    "veg biryani meal": {
+      "items": ["biryani_veg", "yogurt_plain"],
+      "description": "Veg biryani served with yogurt"
+    },
+    "buttermilk snack combo": {
+      "items": ["buttermilk", "biscuit_marie"],
+      "description": "Light snack with buttermilk and biscuits"
+    },
+    "noodles bowl": {
+      "items": ["noodles_instant", "butter", "tomatoes"],
+      "description": "Instant noodles with butter and tomatoes"
+    },
+    "creamy alfredo meal": {
+      "items": ["pasta_alfredo", "juice_orange"],
+      "description": "Creamy alfredo pasta with a drink"
+    },
+    "fruit salad": {
+      "items": ["banana", "apple_red", "fruit_salad"],
+      "description": "Mixed fruit and ready fruit bowl"
+    },
+    "healthy breakfast": {
+      "items": ["milk_full_cream", "banana", "biscuit_marie"],
+      "description": "Light and healthy breakfast"
+    },
+    "quick dinner": {
+      "items": ["biryani_veg", "pasta_alfredo"],
+      "description": "Quick dinner combo with biryani and pasta"
+    },
+    "cold coffee treat": {
+      "items": ["coffee_instant", "milk_full_cream", "icecream_vanilla"],
+      "description": "Homemade cold coffee with vanilla ice cream"
+    }
+  }
+}

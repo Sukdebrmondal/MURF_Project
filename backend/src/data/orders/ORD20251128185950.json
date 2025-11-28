@@ -1,0 +1,44 @@
+{
+  "order_id": "ORD20251128185950",
+  "customer_name": "Sukdeb Mondal",
+  "timestamp": "2025-11-28T18:59:50.688266",
+  "items": [
+    {
+      "item_id": "banana",
+      "name": "Fresh Bananas",
+      "quantity": 1,
+      "price_per_unit": 55,
+      "total": 55
+    },
+    {
+      "item_id": "apple_red",
+      "name": "Red Apples",
+      "quantity": 1,
+      "price_per_unit": 120,
+      "total": 120
+    },
+    {
+      "item_id": "juice_orange",
+      "name": "Orange Juice",
+      "quantity": 1,
+      "price_per_unit": 80,
+      "total": 80
+    },
+    {
+      "item_id": "tea_bag",
+      "name": "Tea Bags",
+      "quantity": 1,
+      "price_per_unit": 150,
+      "total": 150
+    },
+    {
+      "item_id": "milk_full_cream",
+      "name": "Full Cream Milk",
+      "quantity": 1,
+      "price_per_unit": 60,
+      "total": 60
+    }
+  ],
+  "total": 465,
+  "status": "received"
+}
